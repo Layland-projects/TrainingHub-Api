@@ -1,7 +1,10 @@
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Identity.Web;
+using Prometheus;
+using TrainingHub.API.Middleware;
 using TrainingHub.Infrastructure.Implementations.Mock;
+using TrainingHub.Infrastructure.Implementations.Prometheus;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,6 +13,7 @@ var builder = WebApplication.CreateBuilder(args);
 //    .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("AzureAd"));
 
 builder.Services.AddMockInfrastructure();
+builder.Services.AddPrometheus();
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policyBuilder =>
@@ -33,6 +37,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseMetricServer();
+app.UseMiddleware<ResponseMetricMiddleware>();
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();

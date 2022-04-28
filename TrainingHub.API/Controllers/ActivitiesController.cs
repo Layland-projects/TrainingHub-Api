@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using TrainingHub.BusinessLogic.DTOs.Activity;
 using TrainingHub.Infrastructure.Abstractions;
 using TrainingHub.Models.Global;
 using TrainingHub.Models.Models;
@@ -16,8 +17,8 @@ namespace TrainingHub.API.Controllers
             this.activityService = activityService;
         }
 
-        [HttpGet("", Name = "GetPaged")]
-        public async Task<IActionResult> GetPaged([FromQuery]int pageNo = 0, [FromQuery]int pageSize = 10, [FromQuery]ActivityType? type = null)
+        [HttpGet("", Name = "GetActivitiesPaged")]
+        public async Task<IActionResult> GetActivitiesPagedAsync([FromQuery]int pageNo = 0, [FromQuery]int pageSize = 10, [FromQuery]ActivityType? type = null)
         {
             Result<IEnumerable<Activity>> res;
             if (type == null)
@@ -31,17 +32,43 @@ namespace TrainingHub.API.Controllers
             return res.Status == ResultStatus.Success ? Ok(res) : BadRequest(res);
         }
 
-        [HttpGet("{id:int}", Name = "GetSingle")]
-        public async Task<IActionResult> GetSingle([FromRoute]int id)
+        [HttpGet("{id:int}", Name = "GetActivitiesSingle")]
+        public async Task<IActionResult> GetActivitiesSingleAsync([FromRoute]int id)
         {
             var res = await this.activityService.GetById(id);
             return res.Status == ResultStatus.Success ? Ok(res) : BadRequest(res);
         }
 
-        [HttpGet("search", Name = "Search")]
-        public async Task<IActionResult> Search([FromQuery]string term)
+        [HttpPut("{id:int}", Name = "UpdateActivity")]
+        public async Task<IActionResult> UpdateActivityAsync([FromRoute]int id, [FromBody] UpdateActivity_DTO dto)
         {
-            var res = await this.activityService.GetByTitle(term);
+            var res = await this.activityService.Update(id, 
+                dto.Title,
+                dto.Description, 
+                (ActivityType)dto.ActivityType, 
+                dto.IsBodyWeight,
+                dto.Image);
+            return res.Status == ResultStatus.Success ? Ok(res) : BadRequest(res);
+        }
+
+        [HttpGet("search", Name = "SearchActivities")]
+        public async Task<IActionResult> SearchActivitiesAsync([FromQuery]string term, [FromQuery]int pageNo = 0, [FromQuery]int pageSize = 10)
+        {
+            var res = await this.activityService.SearchPaged(term, pageNo, pageSize);
+            return res.Status == ResultStatus.Success ? Ok(res) : BadRequest(res);
+        }
+
+        [HttpDelete("{id:int}/disable", Name = "DisableActivity")]
+        public async Task<IActionResult> DisableActivityAsync([FromRoute]int id)
+        {
+            var res = await this.activityService.Disable(id);
+            return res.Status == ResultStatus.Success ? Ok(res) : BadRequest(res);
+        }
+
+        [HttpPost("{id:int}/enable", Name = "EnableActivity")]
+        public async Task<IActionResult> EnableActivityAsync([FromRoute]int id)
+        {
+            var res = await this.activityService.Enable(id);
             return res.Status == ResultStatus.Success ? Ok(res) : BadRequest(res);
         }
     }

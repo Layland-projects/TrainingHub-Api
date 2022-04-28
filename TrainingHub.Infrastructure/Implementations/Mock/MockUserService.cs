@@ -45,7 +45,7 @@ namespace TrainingHub.Infrastructure.Implementations.Mock
                 LastName = "Barker",
                 Role = UserRole.Trainer,
                 Sessions = new List<Session>(),
-                Trainees = new List<User>(),
+                Trainees = null,
                 Trainer = null,
                 TrainerId = null,
             },
@@ -76,9 +76,7 @@ namespace TrainingHub.Infrastructure.Implementations.Mock
             var u = mockUsers.Where(x => x.Id == 2 || x.Id == 3);
             var session = new Session
             {
-                Trainee = u.First(x => x.Id == 3),
                 TraineeId = 3,
-                Trainer = u.First(x => x.Id == 2),
                 TrainerId = 2,
                 IsCompleted = true,
                 ScheduledFor = DateTime.Now.AddDays(-1),

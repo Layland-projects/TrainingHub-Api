@@ -16,8 +16,8 @@ namespace TrainingHub.API.Controllers
             this.userService = userService;
         }
 
-        [HttpGet("", Name = "GetPaged")]
-        public async Task<IActionResult> GetPagedAsync(CancellationToken cancellationToken, [FromQuery] int pageSize = 10, [FromQuery] int pageNum = 0)
+        [HttpGet("", Name = "GetUsersPaged")]
+        public async Task<IActionResult> GetUsersPagedAsync(CancellationToken cancellationToken, [FromQuery] int pageSize = 10, [FromQuery] int pageNum = 0)
         {
             var res = await this.userService.GetUsersAsync(pageSize, pageNum, cancellationToken);
             return res != null ? Ok(res) : NotFound();

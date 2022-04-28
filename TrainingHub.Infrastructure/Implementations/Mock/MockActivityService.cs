@@ -113,14 +113,19 @@ namespace TrainingHub.Infrastructure.Implementations.Mock
             return Task.FromResult(Result<Activity>.SuccessFrom(a));
         }
 
-        public Task<Result<Activity>> GetByTitle(string title)
+        public Task<Result<IEnumerable<Activity>>> SearchPaged(string searchTerm, int pageNo = 0, int pageSize = 10)
         {
-            var a = mockActivities.SingleOrDefault(x => x.Title == title);
-            if (a == null)
+            var a = mockActivities.Where(x => x.Title.ToLower().Trim().Contains(searchTerm.ToLower().Trim()) ||
+            x.Description.ToLower().Trim().Contains(searchTerm.ToLower().Trim()))
+                .DistinctBy(x => x.Id)
+                .OrderBy(x => x.Id)
+                .Skip(pageNo * pageSize)
+                .Take(pageSize);
+            if (a == null || !a.Any())
             {
-                return Task.FromResult(Result<Activity>.FailureFrom(null, $"Title: {title} not found"));
+                return Task.FromResult(Result<IEnumerable<Activity>>.FailureFrom(Enumerable.Empty<Activity>(), $"Term: {searchTerm} not found"));
             }
-            return Task.FromResult(Result<Activity>.SuccessFrom(a));
+            return Task.FromResult(Result<IEnumerable<Activity>>.SuccessFrom(a));
         }
 
         public Task<Result<IEnumerable<Activity>>> GetPaged(int pageNo = 0, int pageSize = 10)
@@ -135,7 +140,7 @@ namespace TrainingHub.Infrastructure.Implementations.Mock
             return Task.FromResult(Result<IEnumerable<Activity>>.SuccessFrom(a));
         }
 
-        public Task<Result> Remove(int id)
+        public Task<Result> Disable(int id)
         {
             var a = mockActivities.SingleOrDefault(x => x.Id == id);
             if (a == null)
@@ -148,7 +153,7 @@ namespace TrainingHub.Infrastructure.Implementations.Mock
             return Task.FromResult(Result.Success());
         }
 
-        public Task<Result> Remove(string title)
+        public Task<Result> Disable(string title)
         {
             var a = mockActivities.SingleOrDefault(x => x.Title == title);
             if (a == null)
@@ -158,6 +163,30 @@ namespace TrainingHub.Infrastructure.Implementations.Mock
             var username = GetCurrentUsername();
             a.DeletedAt = timestampService.GetDateTimeOffset();
             a.DeletedBy = username;
+            return Task.FromResult(Result.Success());
+        }
+
+        public Task<Result> Enable(int id)
+        {
+            var a = mockActivities.SingleOrDefault(x => x.Id == id);
+            if (a == null)
+            {
+                return Task.FromResult(Result.Failure($"Id: {id} not found"));
+            }
+            a.DeletedAt = null;
+            a.DeletedBy = null;
+            return Task.FromResult(Result.Success());
+        }
+
+        public Task<Result> Enable(string title)
+        {
+            var a = mockActivities.SingleOrDefault(x => x.Title.ToLower().Trim() == title.ToLower().Trim());
+            if (a == null)
+            {
+                return Task.FromResult(Result.Failure($"Title: {title} not found"));
+            }
+            a.DeletedAt = null;
+            a.DeletedBy = null;
             return Task.FromResult(Result.Success());
         }
 
