@@ -36,6 +36,7 @@ namespace TrainingHub.Infrastructure.Implementations.Prometheus
         public void RegisterRequest(string? controllerName = null, string? path = null, int? statusCode = null, string? method = null)
         {
             _requestCounter.WithLabels(controllerName, path, statusCode?.ToString(), method).Inc();
+            RegisterRequest();
         }
 
         public void RegisterResponseTime(int statusCode, string method, TimeSpan elapsed)
