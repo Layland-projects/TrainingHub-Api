@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Identity.Web.Resource;
 using TrainingHub.BusinessLogic.DTOs.Activity;
 using TrainingHub.Infrastructure.Abstractions;
 using TrainingHub.Models.Global;
@@ -7,10 +9,12 @@ using static TrainingHub.Models.Enums.Enums;
 
 namespace TrainingHub.API.Controllers
 {
+    [Authorize(Roles = "App.FullAccess")]
     [ApiController]
     [Route("api/[controller]")]
     public class ActivitiesController : ControllerBase
     {
+        private const string controllerName = "Activities";
         private readonly IActivityService activityService;
         public ActivitiesController(IActivityService activityService)
         {

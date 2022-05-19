@@ -7,7 +7,6 @@ namespace TrainingHub.API.Controllers
     [Authorize]
     [ApiController]
     [Route("[controller]")]
-    [RequiredScope(RequiredScopesConfigurationKey = "AzureAd:Scopes")]
     public class WeatherForecastController : ControllerBase
     {
         private static readonly string[] Summaries = new[]
@@ -22,6 +21,7 @@ namespace TrainingHub.API.Controllers
             _logger = logger;
         }
 
+        [Authorize(Roles = "App.GenericAccess,App.FullAccess")]
         [HttpGet(Name = "GetWeatherForecast")]
         public IEnumerable<WeatherForecast> Get()
         {

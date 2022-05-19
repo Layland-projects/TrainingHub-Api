@@ -1,15 +1,20 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.Identity.Web.Resource;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using TrainingHub.BusinessLogic.DTOs;
 using TrainingHub.Infrastructure.Abstractions;
 using static TrainingHub.Models.Enums.Enums;
+using TrainingHub.API.CustomAttributes;
 
 namespace TrainingHub.API.Controllers
 {
+    [Authorize(Roles = "App.FullAccess")]
     [ApiController]
     [Route("api/[controller]")]
     public class UsersController : ControllerBase
     {
+        const string controllerName = "Users";
         private readonly IUserService userService;
         public UsersController(IUserService userService)
         {
@@ -31,6 +36,7 @@ namespace TrainingHub.API.Controllers
         }
 
         [HttpPost("signup", Name = "SignUp")]
+        [RequiredScope($"{controllerName}.WriteAccess")]
         public async Task<IActionResult> SignUpAsync([FromBody] SignUp_DTO dto)
         {
             var res = await this.userService.CreateUserAsync(
@@ -73,6 +79,7 @@ namespace TrainingHub.API.Controllers
         }
 
         [HttpPost("updateEmail", Name = "UpdateEmail")]
+        [RequiredScope($"{controllerName}.WriteAccess")]
         public async Task<IActionResult> UpdateEmailAsync([FromBody] UpdateEmail_DTO dto)
         {
             var res = await this.userService.UpdateEmailAsync(dto.Id, dto.Email);
@@ -80,6 +87,7 @@ namespace TrainingHub.API.Controllers
         }
 
         [HttpPost("updatePassword", Name = "UpdatePassword")]
+        [RequiredScope($"{controllerName}.WriteAccess")]
         public async Task<IActionResult> UpdatePasswordAsync([FromBody] UpdatePassword_DTO dto)
         {
             var res = await this.userService.UpdatePasswordAsync(dto.Id, dto.Password);
@@ -87,6 +95,7 @@ namespace TrainingHub.API.Controllers
         }
 
         [HttpPut("{id:int}", Name = "UpdateUser")]
+        [RequiredScope($"{controllerName}.WriteAccess")]
         public async Task<IActionResult> UpdateUserAsync([FromRoute]int id, [FromBody] UpdateUser_DTO dto)
         {
             var res = await this.userService.UpdateUserAsync(id, dto.Title, dto.FirstName, dto.LastName);

@@ -36,7 +36,7 @@ namespace TrainingHub.API.Middleware
                 sw.Stop();
                 if (controllerNames != null && controllerNames.Any())
                 {
-                    var name = controllerNames.FirstOrDefault(x => path.Contains(x.ToLower()));
+                    var name = controllerNames.FirstOrDefault(x => path.ToLower().Contains(x.ToLower()));
                     if (string.IsNullOrEmpty(name))
                     {
                         reporter.RegisterRequest(null , path, httpContext.Response.StatusCode, httpContext.Request.Method);
