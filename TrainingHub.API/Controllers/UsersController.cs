@@ -36,7 +36,7 @@ namespace TrainingHub.API.Controllers
             return res.Status == ResultStatus.Success ? Ok(res) : BadRequest(res);
         }
 
-        [HttpGet("{azureId:guid}", Name = "GetByAzureId")]
+        [HttpGet("azure/{azureId:guid}", Name = "GetByAzureId")]
         public async Task<IActionResult> GetByAzureId([FromRoute]Guid azureId, CancellationToken cancellationToken)
         {
             var res = await this.userService.GetUserByAzureIdAsync(azureId, cancellationToken);
