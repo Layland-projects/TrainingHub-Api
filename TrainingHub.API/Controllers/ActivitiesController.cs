@@ -12,6 +12,7 @@ namespace TrainingHub.API.Controllers
     [Authorize(Roles = "App.FullAccess")]
     [ApiController]
     [Route("api/[controller]")]
+    [RequiredScope("AngularApp")]
     public class ActivitiesController : ControllerBase
     {
         private const string controllerName = "Activities";

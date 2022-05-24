@@ -16,7 +16,7 @@ namespace TrainingHub.Models.Models
         public string Username { get; set; }
         public string ContactNumber { get; set; } //could make this a type but is it worth it?
         public string Email { get; set; } //could make this a type but is it worth it?
-        public int AuthId { get; set; } //this is the .net auth user id
+        public Guid AzureId { get; set; } //this is the azure user Id
 
         public UserRole Role { get; set; }
 

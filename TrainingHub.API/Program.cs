@@ -32,10 +32,19 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
-    var scopes = Assembly.GetAssembly(typeof(ControllerMarker))?.DefinedTypes.SelectMany(t => t.GetMethods())
+    var methodScopes = Assembly.GetAssembly(typeof(ControllerMarker))?.DefinedTypes.SelectMany(t => t.GetMethods())
     .SelectMany(m => m?.GetCustomAttribute<RequiredScopeAttribute>()?.Arguments ?? Array.Empty<object>())
     .SelectMany(x => x as string[] ?? Array.Empty<string>())
     .Where(x => x != null && x != default && x.Length > 0).Distinct();
+    
+    var scopes = Assembly.GetAssembly(typeof(ControllerMarker))?.DefinedTypes
+    .SelectMany(t => t.GetCustomAttribute<RequiredScopeAttribute>()?.Arguments ?? Array.Empty<object>())
+    .SelectMany(s => s as string[] ?? Array.Empty<string>())
+    .Where(s => s != null && s != default && s.Length > 0).Distinct();
+
+    scopes = methodScopes != null && scopes != null ? scopes.Union(methodScopes) :
+    methodScopes != null && scopes == null ? methodScopes :
+    scopes != null && methodScopes == null ? scopes : Enumerable.Empty<string>();
 
     options.AddSecurityDefinition("oauth2", new OpenApiSecurityScheme
     {

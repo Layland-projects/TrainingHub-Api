@@ -14,7 +14,7 @@ namespace TrainingHub.Infrastructure.Implementations.Mock
             new User
             {
                 Id = 1,
-                AuthId = 1,
+                AzureId = Guid.NewGuid(),
                 CreatedAt = DateTime.Now,
                 UpdatedAt = DateTime.Now,
                 CreatedBy = "System",
@@ -33,7 +33,7 @@ namespace TrainingHub.Infrastructure.Implementations.Mock
             new User
             {
                 Id = 2,
-                AuthId = 2,
+                AzureId = Guid.NewGuid(),
                 CreatedAt = DateTime.Now,
                 UpdatedAt = DateTime.Now,
                 CreatedBy = "System",
@@ -52,7 +52,7 @@ namespace TrainingHub.Infrastructure.Implementations.Mock
             new User
             {
                 Id = 3,
-                AuthId = 3,
+                AzureId = Guid.NewGuid(),
                 CreatedAt = DateTime.Now,
                 UpdatedAt = DateTime.Now,
                 CreatedBy = "System",
@@ -125,7 +125,7 @@ namespace TrainingHub.Infrastructure.Implementations.Mock
             var user = new User
             {
                 Id = ++currentId,
-                AuthId = rand.Next(1, 100),
+                AzureId = Guid.NewGuid(),
                 FirstName = firstName,
                 LastName = lastName,
                 Title = title,
@@ -162,80 +162,50 @@ namespace TrainingHub.Infrastructure.Implementations.Mock
             return Task.FromResult(Result<IEnumerable<User>>.SuccessFrom(users));
         }
 
-        public Task<Result> UpdateEmailAsync(int id, string email)
+        public Task<Result> Register(Guid azureId, string contactNumber, string email, string firstName, string lastName,
+            int role, CancellationToken cancellationToken)
         {
-            var user = mockUsers.Where(x => x.Id == id).SingleOrDefault();
-            if (user != null)
-            {
-                user.Email = email;
-                return Task.FromResult(Result.Success());
-            }
-            return Task.FromResult(Result.Failure($"User for id: {id} not found"));
-        }
-
-        public Task<Result> UpdatePasswordAsync(int id, string password)
-        {
-            var user = mockUsers.Where(x => x.Id == id).SingleOrDefault();
-            if (user != null)
-            {
-                //not storing password here is it's a mock.
-                return Task.FromResult(Result.Success());
-            }
-            return Task.FromResult(Result.Failure($"User for id: {id} not found"));
-        }
-
-        public Task<Result> UpdateUsernameAsync(int id, string username) 
-        {
-            var user = mockUsers.Where(x => x.Id == id).SingleOrDefault();
-            if (user != null)
-            {
-                user.Username = username;
-            }
-            return Task.FromResult(Result.Failure($"User for id: {id} not found"));
-        }
-
-        public Task<Result<int>> SignIn(string username, string password)
-        {
-            var user = mockUsers.SingleOrDefault(x => x.Username == username || x.Email == username);
+            var user = mockUsers.SingleOrDefault(x => x.AzureId == azureId);
             if (user == null)
             {
-                return Task.FromResult(Result<int>.FailureFrom(0, $"No user exists for provided username & password"));
+                user = new()
+                {
+                    CreatedAt = timestampService.GetDateTimeOffset(),
+                    CreatedBy = email,
+                    AzureId = azureId,
+                    Id = ++currentId,
+                };
             }
-            SignedInUser = user;
-            return Task.FromResult(Result<int>.SuccessFrom(user.Id));
-        }
-
-        public Task<Result> SignOut(int id)
-        {
-            if (SignedInUser == null || SignedInUser.Id != id)
+            var uRole = (UserRole)role;
+            user.UpdatedAt = timestampService.GetDateTimeOffset();
+            user.UpdatedBy = email;
+            user.ContactNumber = contactNumber;
+            user.Email = email;
+            user.FirstName = firstName;
+            user.LastName = lastName;
+            user.Role = uRole;
+            user.Title = string.IsNullOrEmpty(user.Title) ? "Mx" : user.Title;
+            user.Sessions = user.Sessions!= null && user.Sessions.Count > 0 ? user.Sessions : new List<Session>();
+            user.Trainees = uRole != UserRole.Trainee ? user.Trainees != null && user.Trainees.Count > 0 ? user.Trainees : new List<User>() : null;
+            user.Trainer = null; //might be a way to find this out
+            user.TrainerId = null; //might be a way to find this out
+            user.Username = email;
+            if (mockUsers.Any(x => x.AzureId == azureId))
             {
-                return Task.FromResult(Result.Failure($"User with id: {id} is not currently signed in"));
+                mockUsers.Add(user);
             }
-            SignedInUser = null;
             return Task.FromResult(Result.Success());
         }
 
-        public Task<Result> ForgotPassword(string email)
+        public Task<Result<User>> GetUserByAzureIdAsync(Guid azureId, CancellationToken cancellationToken)
         {
-            if (mockUsers.Any(x => x.Email == email))
+            if (cancellationToken.IsCancellationRequested)
             {
-                // pretend to send e-mail
-                return Task.FromResult(Result.Success());
+                return Task.FromCanceled<Result<User>>(cancellationToken);
             }
-            return Task.FromResult(Result.Failure($"email: {email} doesn't exist"));
-        }
-
-        public Task<Result> UpdateUserAsync(int id, string title, string firstName, string lastName)
-        {
-            var user = mockUsers.SingleOrDefault(x => x.Id == id);
-            if (user == null)
-            {
-                return Task.FromResult(Result.Failure($"No user found for id: {id}"));
-            }
-            user.Title = title != user.Title ? title : user.Title;
-            user.FirstName = firstName != user.FirstName ? firstName : user.FirstName;
-            user.LastName = lastName != user.LastName ? lastName : user.LastName;
-            return Task.FromResult(Result.Success());
+            var user = mockUsers.SingleOrDefault(x => x.AzureId == azureId);
+            return user == null ? Task.FromResult(Result<User>.FailureFrom(null, $"No User exists with the provided Id: {azureId}"))
+                : Task.FromResult(Result<User>.SuccessFrom(user));
         }
     }
 }
