@@ -14,7 +14,7 @@ namespace TrainingHub.Infrastructure.Implementations.Mock
             new User
             {
                 Id = 1,
-                AzureId = Guid.NewGuid(),
+                AzureId = Guid.Parse("855106d5-6b44-4bfd-94c3-c86fc22d4e06"), 
                 CreatedAt = DateTime.Now,
                 UpdatedAt = DateTime.Now,
                 CreatedBy = "System",
@@ -71,43 +71,6 @@ namespace TrainingHub.Infrastructure.Implementations.Mock
         };
         private readonly ITimestampService timestampService;
 
-        static MockUserService()
-        {
-            var u = mockUsers.Where(x => x.Id == 2 || x.Id == 3);
-            var session = new Session
-            {
-                TraineeId = 3,
-                TrainerId = 2,
-                IsCompleted = true,
-                ScheduledFor = DateTime.Now.AddDays(-1),
-                Sets = new List<ActivitySet>()
-                {
-                    new ActivitySet
-                    {
-                        Activity = new Activity
-                        {
-                            Id = 1,
-                            CreatedAt = DateTime.Now,
-                            UpdatedAt = DateTime.Now,
-                            CreatedBy = "System",
-                            UpdatedBy = "System",
-                            Title = "Push ups",
-                            Description = "Upper body bw exercise",
-                            Image = "placeholder.png",
-                            IsBodyWeight = true,
-                            Type = ActivityType.Repetitions
-                        },
-                        ActivityId = 1,
-                        ActivityCount = 5,
-                        Repetitions = 10
-                    }
-                }
-            };
-            foreach(var usr in u)
-            {
-                usr.Sessions.Add(session);
-            }
-        }
         public MockUserService(ITimestampService timestampService)
         {
             this.timestampService = timestampService;
@@ -119,7 +82,7 @@ namespace TrainingHub.Infrastructure.Implementations.Mock
             // ToDo: change to return error saying user already registered
             if (existingUser != null)
             {
-                return Task.FromResult(Result<User>.FailureFrom(null)) ;
+                return Task.FromResult(Result.FailureFrom<User>(null)) ;
             }
             var rand = new Random();
             var user = new User
@@ -138,7 +101,7 @@ namespace TrainingHub.Infrastructure.Implementations.Mock
                 UpdatedBy = email
             };
             mockUsers.Add(user);
-            return Task.FromResult(Result<User>.SuccessFrom(user));
+            return Task.FromResult(Result.SuccessFrom(user));
         }
 
         public Task<Result<User>> GetUserAsync(int id, CancellationToken cancellationToken)
@@ -146,9 +109,9 @@ namespace TrainingHub.Infrastructure.Implementations.Mock
             var user = mockUsers.Where(x => x.Id == id).SingleOrDefault();
             if (user == null)
             {
-                return Task.FromResult(Result<User>.FailureFrom(null, $"User /w id: {id} not found"));
+                return Task.FromResult(Result.FailureFrom<User>(null, $"User /w id: {id} not found"));
             }
-            return Task.FromResult(Result<User>.SuccessFrom(user));
+            return Task.FromResult(Result.SuccessFrom(user));
         }
 
         public Task<Result<IEnumerable<User>>> GetUsersAsync(int pageSize, int pageNum, CancellationToken cancellationToken)
@@ -156,10 +119,10 @@ namespace TrainingHub.Infrastructure.Implementations.Mock
             var users = mockUsers.Skip(pageNum * pageSize).Take(pageSize);
             if (users == null)
             {
-                return Task.FromResult(Result<IEnumerable<User>>.FailureFrom(Enumerable.Empty<User>(),
+                return Task.FromResult(Result.FailureFrom(Enumerable.Empty<User>(),
                     $"No entries for pageNum: {pageNum}, pageSize: {pageSize}"));
             }
-            return Task.FromResult(Result<IEnumerable<User>>.SuccessFrom(users));
+            return Task.FromResult(Result.SuccessFrom(users));
         }
 
         public Task<Result> Register(Guid azureId, string contactNumber, string email, string firstName, string lastName,
@@ -204,7 +167,7 @@ namespace TrainingHub.Infrastructure.Implementations.Mock
                 return Task.FromCanceled<Result<User>>(cancellationToken);
             }
             var user = mockUsers.SingleOrDefault(x => x.AzureId == azureId);
-            return user == null ? Task.FromResult(Result<User>.FailureFrom(null, $"No User exists with the provided Id: {azureId}"))
+            return user == null ? Task.FromResult(Result.FailureFrom<User>(null, $"No User exists with the provided Id: {azureId}"))
                 : Task.FromResult(Result<User>.SuccessFrom(user));
         }
     }

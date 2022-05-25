@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TrainingHub.Models.Models.Shared;
 
 namespace TrainingHub.Models.Models
 {
-    public class Session
+    public class Session : AuditableEntityBase
     {
         public User Trainee { get; set; }
         public int TraineeId { get; set; }

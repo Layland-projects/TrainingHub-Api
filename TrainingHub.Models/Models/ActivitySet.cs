@@ -3,11 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TrainingHub.Models.Models.Shared;
 using static TrainingHub.Models.Enums.Enums;
 
 namespace TrainingHub.Models.Models
 {
-    public class ActivitySet
+    public class ActivitySet : AuditableEntityBase
     {
         public Activity Activity { get; set; }
         public int ActivityId { get; set; }

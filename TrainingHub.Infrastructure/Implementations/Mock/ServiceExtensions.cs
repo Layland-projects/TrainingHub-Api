@@ -10,6 +10,7 @@ namespace TrainingHub.Infrastructure.Implementations.Mock
             services.AddSingleton<IUserService, MockUserService>();
             services.AddSingleton<ITimestampService, MockTimestampService>();
             services.AddSingleton<IActivityService, MockActivityService>();
+            services.AddSingleton<ISessionService, MockSessionService>();
             return services;
         }
     }

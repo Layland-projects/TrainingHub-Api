@@ -42,37 +42,25 @@ namespace TrainingHub.Models.Global
                 Status = ResultStatus.Error
             };
         }
-    }
 
-    public sealed class Result<T> : Result
-    {
-        private Result() : base()
+        public static Result<T> SuccessFrom<T>(T data)
         {
-
+            return new Result<T>(data) { Status = ResultStatus.Success };
         }
 
-        public T Data { get; set; }
-
-        public static Result<T> SuccessFrom(T data)
+        public static Result<T> FailureFrom<T>(T data, params string[] messages)
         {
-            return new Result<T> { Data = data, Status = ResultStatus.Success };
+            return new Result<T>(data){ Status = ResultStatus.Failed, Errors = messages.ToList() };
         }
 
-        public static Result<T> FailureFrom(T data, params string[] messages)
+        public static Result<T> ErrorFrom<T>(T data, params string[] messages)
         {
-            return new Result<T> { Data = data, Status = ResultStatus.Failed, Errors = messages.ToList() };
+            return new Result<T>(data) { Status = ResultStatus.Error, Errors = messages.ToList() };
         }
-
-        public static Result<T> ErrorFrom(T data, params string[] messages)
+        public static Result<T> ErrorFrom<T>(T data, Exception ex)
         {
-            return new Result<T> { Data = data, Status = ResultStatus.Error, Errors = messages.ToList() };
-        }
-
-        public static Result<T> ErrorFrom(T data, Exception ex)
-        {
-            return new Result<T>
+            return new Result<T>(data)
             {
-                Data = data,
                 Status = ResultStatus.Error,
                 Errors = new List<string>
                 {
@@ -80,5 +68,15 @@ namespace TrainingHub.Models.Global
                 }
             };
         }
+    }
+
+    public sealed class Result<T> : Result
+    {
+        internal Result(T data) : base()
+        {
+            this.Data = data;
+        }
+
+        public T Data { get; }
     }
 }

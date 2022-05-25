@@ -64,18 +64,18 @@ namespace TrainingHub.Infrastructure.Implementations.Mock
         {
             if (mockActivities.SingleOrDefault(x => x.Id == id) != null)
             {
-                return Task.FromResult(Result<bool>.SuccessFrom(true));
+                return Task.FromResult(Result.SuccessFrom(true));
             }
-            return Task.FromResult(Result<bool>.SuccessFrom(false));
+            return Task.FromResult(Result.SuccessFrom(false));
         }
 
         public Task<Result<bool>> ActivityExists(string title)
         {
             if (mockActivities.SingleOrDefault(x => x.Title.ToLower().Trim() == title.ToLower().Trim()) != null)
             {
-                return Task.FromResult(Result<bool>.SuccessFrom(true));
+                return Task.FromResult(Result.SuccessFrom(true));
             }
-            return Task.FromResult(Result<bool>.SuccessFrom(false));
+            return Task.FromResult(Result.SuccessFrom(false));
         }
 
         public async Task<Result> Add(string title, string description, Enums.ActivityType type, bool isBodyWeight, string image)
@@ -108,9 +108,9 @@ namespace TrainingHub.Infrastructure.Implementations.Mock
             var a = mockActivities.SingleOrDefault(x => x.Id == id);
             if (a == null)
             {
-                return Task.FromResult(Result<Activity>.FailureFrom(null, $"Id: {id} not found"));
+                return Task.FromResult(Result.FailureFrom<Activity>(null, $"Id: {id} not found"));
             }
-            return Task.FromResult(Result<Activity>.SuccessFrom(a));
+            return Task.FromResult(Result.SuccessFrom(a));
         }
 
         public Task<Result<IEnumerable<Activity>>> SearchPaged(string searchTerm, int pageNo = 0, int pageSize = 10)
@@ -123,9 +123,9 @@ namespace TrainingHub.Infrastructure.Implementations.Mock
                 .Take(pageSize);
             if (a == null || !a.Any())
             {
-                return Task.FromResult(Result<IEnumerable<Activity>>.FailureFrom(Enumerable.Empty<Activity>(), $"Term: {searchTerm} not found"));
+                return Task.FromResult(Result.FailureFrom(Enumerable.Empty<Activity>(), $"Term: {searchTerm} not found"));
             }
-            return Task.FromResult(Result<IEnumerable<Activity>>.SuccessFrom(a));
+            return Task.FromResult(Result.SuccessFrom(a));
         }
 
         public Task<Result<IEnumerable<Activity>>> GetPaged(int pageNo = 0, int pageSize = 10)
